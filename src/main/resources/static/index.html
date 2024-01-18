@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<title>Demo</title>
+	<meta name="description" content="" />
+	<meta name="viewport" content="width=device-width" />
+	<base href="/" />
+	<link rel="stylesheet" type="text/css" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+	<script src="https://unpkg.com/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script type="importmap">
+		{
+			"imports": {
+				"@hotwired/stimulus": "https://unpkg.com/@hotwired/stimulus/dist/stimulus.js",
+				"@hotwired/turbo": "https://unpkg.com/@hotwired/turbo/dist/turbo.es2017-esm.js"
+			}
+		}
+	</script>
+</head>
+
+<body>
+	<header>
+		<h1>Demo</h1>
+	</header>
+	<main>
+		<br />
+		<div class="container" data-controller="hello">
+			<div id="auth" data-hello-target="auth">
+				Unauthenticated
+			</div>
+			<div id="greeting" data-hello-target="output">Placeholder</div>
+			<input id="name" name="value" type="text" data-hello-target="name" />
+			<button class="btn btn-primary" data-action="click->hello#greet">Greet</button>
+		</div>
+		<br/>
+		<div class="container" data-controller="stream">
+			<div id="load" data-stream-target="load">&nbsp;</div>
+			<button class="btn btn-primary" data-action="click->stream#start">Connect</button>
+			<button class="btn btn-primary" data-action="click->stream#stop">Disconnect</button>
+		</div>
+		<br/>
+		<turbo-frame id="turbo">
+			<div class="container" id="frame">
+				<div id="hello">&nbsp;</div>
+				<div id="world">&nbsp;</div>
+				<form action="/test" method="post">
+					<button class="btn btn-primary" type="submit">Fetch Content</button>
+				</form>
+			</div>
+		</turbo-frame>
+		</div>
+	</main>
+
+	<script type="module">
+		import { Application, Controller } from '@hotwired/stimulus';
+		window.Stimulus = Application.start();
+
+		import * as Turbo from '@hotwired/turbo';
+
+		Stimulus.register("stream", class extends Controller {
+			static targets = ["load"]
+			start() {
+				this.events = new EventSource("/stream");
+				Turbo.connectStreamSource(this.events);
+			};
+			stop() {
+				if (this.events) {
+					this.events.close();
+					Turbo.disconnectStreamSource(this.events);
+				}
+			};
+		});
+
+		Stimulus.register("hello", class extends Controller {
+			static targets = ["name", "output", "auth"]
+			initialize() {
+				let hello = this;
+				fetch("/user").then(response => {
+					response.json().then(data => {
+						hello.authTarget.textContent = `Logged in as: ${data.name}`;
+					});
+				});
+			}
+			greet() {
+				this.outputTarget.textContent = `Hello, ${this.nameTarget.value}!`;
+			};
+		});
+
+	</script>
+
+</body>
+
+</html>
