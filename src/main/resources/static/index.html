@@ -9,15 +9,9 @@
 	<meta name="viewport" content="width=device-width" />
 	<base href="/" />
 	<link rel="stylesheet" type="text/css" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
-	<script src="https://unpkg.com/bootstrap/dist/js/bootstrap.min.js"></script>
-	<script type="importmap">
-		{
-			"imports": {
-				"@hotwired/stimulus": "https://unpkg.com/@hotwired/stimulus?module",
-				"@hotwired/turbo": "https://unpkg.com/@hotwired/turbo?module"
-			}
-		}
-	</script>
+	<script src="https://unpkg.com/bootstrap"></script>
+	<script src="https://unpkg.com/@hotwired/stimulus"></script>
+	<script src="https://unpkg.com/@hotwired/turbo"></script>
 </head>
 
 <body>
@@ -53,13 +47,11 @@
 		</div>
 	</main>
 
-	<script type="module">
-		import { Application, Controller } from '@hotwired/stimulus';
-		window.Stimulus = Application.start();
+	<script>
+		var app = Stimulus.Application.start();
+		var Controller = Stimulus.Controller;
 
-		import * as Turbo from '@hotwired/turbo';
-
-		Stimulus.register("stream", class extends Controller {
+		app.register("stream", class extends Controller {
 			static targets = ["load"]
 			start() {
 				this.events = new EventSource("/stream");
@@ -73,7 +65,7 @@
 			};
 		});
 
-		Stimulus.register("hello", class extends Controller {
+		app.register("hello", class extends Controller {
 			static targets = ["name", "output", "auth"]
 			initialize() {
 				let hello = this;
