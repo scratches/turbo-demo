@@ -7,18 +7,11 @@ import java.util.Map;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.mustache.MustacheProperties;
-import org.springframework.boot.web.servlet.view.MustacheViewResolver;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.samskivert.mustache.Mustache.Compiler;
 
 @SpringBootApplication
 @Controller
@@ -42,48 +35,6 @@ public class JsDemoApplication {
 	public List<ModelAndView> test() {
 		return List.of(new ModelAndView("test").addObject("id", "hello").addObject("value", "Hello"),
 				new ModelAndView("test").addObject("id", "world").addObject("value", "World"));
-	}
-
-	@Bean
-	@ConditionalOnProperty(prefix = "spring.mustache", name = "enabled", matchIfMissing = true)
-	MustacheViewResolver mustacheTurboViewResolver(Compiler mustacheCompiler, MustacheProperties mustache) {
-		MustacheViewResolver resolver = new MustacheViewResolver(mustacheCompiler);
-		resolver.setPrefix(mustache.getPrefix());
-		resolver.setSuffix(mustache.getSuffix());
-		resolver.setCache(mustache.getServlet().isCache());
-		resolver.setContentType("text/vnd.turbo-stream.html");
-		resolver.setViewNames(mustache.getViewNames());
-		resolver.setExposeRequestAttributes(mustache.getServlet().isExposeRequestAttributes());
-		resolver.setAllowRequestOverride(mustache.getServlet().isAllowRequestOverride());
-		resolver.setAllowSessionOverride(mustache.getServlet().isAllowSessionOverride());
-		resolver.setExposeSessionAttributes(mustache.getServlet().isExposeSessionAttributes());
-		resolver.setExposeSpringMacroHelpers(mustache.getServlet().isExposeSpringMacroHelpers());
-		resolver.setRequestContextAttribute(mustache.getRequestContextAttribute());
-		resolver.setCharset(mustache.getCharsetName());
-		resolver.setOrder(Ordered.LOWEST_PRECEDENCE - 10);
-		return resolver;
-	}
-
-	@Bean
-	@ConditionalOnProperty(prefix = "spring.mustache", name = "enabled", matchIfMissing = true)
-	MustacheViewResolver mustacheViewResolver(Compiler mustacheCompiler, MustacheProperties mustache) {
-		MustacheViewResolver resolver = new MustacheViewResolver(mustacheCompiler);
-		resolver.setPrefix(mustache.getPrefix());
-		resolver.setSuffix(mustache.getSuffix());
-		resolver.setCache(mustache.getServlet().isCache());
-		if (mustache.getServlet().getContentType() != null) {
-			resolver.setContentType(mustache.getServlet().getContentType().toString());
-		}
-		resolver.setViewNames(mustache.getViewNames());
-		resolver.setExposeRequestAttributes(mustache.getServlet().isExposeRequestAttributes());
-		resolver.setAllowRequestOverride(mustache.getServlet().isAllowRequestOverride());
-		resolver.setAllowSessionOverride(mustache.getServlet().isAllowSessionOverride());
-		resolver.setExposeSessionAttributes(mustache.getServlet().isExposeSessionAttributes());
-		resolver.setExposeSpringMacroHelpers(mustache.getServlet().isExposeSpringMacroHelpers());
-		resolver.setRequestContextAttribute(mustache.getRequestContextAttribute());
-		resolver.setCharset(mustache.getCharsetName());
-		resolver.setOrder(Ordered.LOWEST_PRECEDENCE - 10);
-		return resolver;
 	}
 
 	public static void main(String[] args) {

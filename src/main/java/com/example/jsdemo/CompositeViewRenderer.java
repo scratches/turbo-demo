@@ -3,6 +3,7 @@ package com.example.jsdemo;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,8 +17,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
@@ -72,18 +76,20 @@ public class CompositeViewRenderer implements HandlerMethodReturnValueHandler, W
 				.getMethodAnnotation(RequestMapping.class).produces();
 		MediaType type = methodAnnotation.length > 0 ? MediaType.valueOf(methodAnnotation[0]) : MediaType.TEXT_HTML;
 		var response = webRequest.getNativeResponse(HttpServletResponse.class);
+		var request = webRequest.getNativeRequest(HttpServletRequest.class);
 		if (response.getContentType() == null) {
 			response.setContentType(type.toString());
 		}
 		@SuppressWarnings("unchecked")
-		List<ModelAndView> renderings = resolve(response, (List<ModelAndView>) returnValue);
+		List<ModelAndView> renderings = resolve(request, response, (List<ModelAndView>) returnValue);
 		mavContainer.setView(new CompositeView(renderings));
 	}
 
-	private List<ModelAndView> resolve(HttpServletResponse response, List<ModelAndView> renderings) {
+	private List<ModelAndView> resolve(HttpServletRequest request, HttpServletResponse response,
+			List<ModelAndView> renderings) {
 		for (ModelAndView rendering : renderings) {
 			try {
-				resolve(response, rendering);
+				resolve(request, response, rendering);
 			} catch (Exception e) {
 				logger.error("Failed to resolve view", e);
 			}
@@ -91,7 +97,8 @@ public class CompositeViewRenderer implements HandlerMethodReturnValueHandler, W
 		return renderings;
 	}
 
-	private void resolve(HttpServletResponse response, ModelAndView rendering) throws Exception {
+	private void resolve(HttpServletRequest request, HttpServletResponse response, ModelAndView rendering)
+			throws Exception {
 		View view = null;
 		if (rendering.getView() instanceof View) {
 			view = (View) rendering.getView();
@@ -100,6 +107,8 @@ public class CompositeViewRenderer implements HandlerMethodReturnValueHandler, W
 			if (locale == null) {
 				locale = Locale.getDefault();
 			}
+			// Make sure HTML is always producible
+			request.setAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Set.of(MediaType.TEXT_HTML));
 			view = resolver.resolveViewName((String) rendering.getViewName(), locale);
 		}
 		rendering.setView(view);
