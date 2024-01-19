@@ -27,7 +27,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.example.servlet.ServerlessHttpServletResponse;
+import com.example.jsdemo.ServletUtils.ServerlessHttpServletResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

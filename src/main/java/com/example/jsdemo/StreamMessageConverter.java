@@ -17,8 +17,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
-import com.example.servlet.ServerlessHttpServletRequest;
-import com.example.servlet.ServerlessHttpServletResponse;
+import com.example.jsdemo.ServletUtils.ServerlessHttpServletRequest;
+import com.example.jsdemo.ServletUtils.ServerlessHttpServletResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -41,7 +41,7 @@ public class StreamMessageConverter implements HttpMessageConverter<ModelAndView
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		throw new UnsupportedOperationException("Cannot read messages (write only)");
+		return false;
 	}
 
 	@Override
