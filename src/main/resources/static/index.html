@@ -54,6 +54,7 @@
 		app.register("stream", class extends Controller {
 			static targets = ["load"]
 			start() {
+				stop();
 				this.events = new EventSource("/stream");
 				Turbo.connectStreamSource(this.events);
 			};

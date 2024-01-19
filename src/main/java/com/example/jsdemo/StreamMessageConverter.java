@@ -19,7 +19,6 @@ import org.springframework.web.servlet.ViewResolver;
 
 import com.example.servlet.ServerlessHttpServletRequest;
 import com.example.servlet.ServerlessHttpServletResponse;
-import com.example.servlet.ServerlessServletContext;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -65,7 +64,7 @@ public class StreamMessageConverter implements HttpMessageConverter<ModelAndView
 	public void write(ModelAndView rendering, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 		initialize();
-		HttpServletRequest request = new ServerlessHttpServletRequest(new ServerlessServletContext(), "GET", "/");
+		HttpServletRequest request = new ServerlessHttpServletRequest("GET", "/");
 		ServerlessHttpServletResponse wrapper = new ServerlessHttpServletResponse();
 		try {
 			RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));

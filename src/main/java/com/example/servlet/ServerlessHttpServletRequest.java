@@ -42,6 +42,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.ReadListener;
@@ -58,13 +65,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpUpgradeHandler;
 import jakarta.servlet.http.Part;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 /**
  *
@@ -85,8 +85,6 @@ public class ServerlessHttpServletRequest implements HttpServletRequest {
 	 */
 	private static final String[] DATE_FORMATS = new String[] { "EEE, dd MMM yyyy HH:mm:ss zzz",
 			"EEE, dd-MMM-yy HH:mm:ss zzz", "EEE MMM dd HH:mm:ss yyyy" };
-
-	private final ServletContext servletContext;
 
 	// ---------------------------------------------------------------------
 	// ServletRequest properties
@@ -165,8 +163,7 @@ public class ServerlessHttpServletRequest implements HttpServletRequest {
 
 	private AsyncContext asyncContext;
 
-	public ServerlessHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
-		this.servletContext = servletContext;
+	public ServerlessHttpServletRequest(String method, String requestURI) {
 		this.method = method;
 		this.requestURI = requestURI;
 		this.locales.add(Locale.ENGLISH);
@@ -183,7 +180,7 @@ public class ServerlessHttpServletRequest implements HttpServletRequest {
 	 */
 	@Override
 	public ServletContext getServletContext() {
-		return this.servletContext;
+		return null;
 	}
 
 	@Override
@@ -622,10 +619,6 @@ public class ServerlessHttpServletRequest implements HttpServletRequest {
 		return "proxy";
 	}
 
-	public void setLocalPort(int localPort) {
-		throw new UnsupportedOperationException();
-	}
-
 	@Override
 	public int getLocalPort() {
 		throw new UnsupportedOperationException();
@@ -633,30 +626,17 @@ public class ServerlessHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public AsyncContext startAsync() {
-		return startAsync(this, null);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public AsyncContext startAsync(ServletRequest request, @Nullable ServletResponse response) {
-		Assert.state(this.asyncSupported, "Async not supported");
-		this.dispatcherType = DispatcherType.ASYNC;
-		this.asyncStarted = true;
-		this.asyncContext = this.asyncContext == null ? new ServerlessAsyncContext(request, response) : this.asyncContext;
-		return this.asyncContext;
-	}
-
-	public void setAsyncStarted(boolean asyncStarted) {
-		this.asyncStarted = asyncStarted;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean isAsyncStarted() {
 		return this.asyncStarted;
-	}
-
-	public void setAsyncSupported(boolean asyncSupported) {
-		this.asyncSupported = asyncSupported;
-		this.dispatcherType = DispatcherType.ASYNC;
 	}
 
 	@Override
@@ -906,17 +886,10 @@ public class ServerlessHttpServletRequest implements HttpServletRequest {
 		return this.servletPath;
 	}
 
-	public void setSession(HttpSession session) {
-		throw new UnsupportedOperationException();
-	}
-
 	@Override
 	@Nullable
 	public HttpSession getSession(boolean create) {
-		if (this.session == null) {
-			this.session = new ServerlessHttpSession(this.servletContext);
-		}
-		return this.session;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
