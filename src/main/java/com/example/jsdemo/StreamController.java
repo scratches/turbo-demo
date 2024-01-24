@@ -17,4 +17,5 @@ public class StreamController {
 		return Flux.interval(Duration.ofSeconds(5)).map(value -> new ModelAndView("time").addObject("value", value)
 				.addObject("time", System.currentTimeMillis()));
 	}
+
 }

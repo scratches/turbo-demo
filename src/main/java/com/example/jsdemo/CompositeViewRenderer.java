@@ -17,8 +17,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
@@ -34,7 +32,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 2)
-public class CompositeViewRenderer implements HandlerMethodReturnValueHandler, WebMvcConfigurer {
+public class CompositeViewRenderer
+		implements HandlerMethodReturnValueHandler, WebMvcConfigurer {
 
 	private static Log logger = LogFactory.getLog(CompositeViewRenderer.class);
 
