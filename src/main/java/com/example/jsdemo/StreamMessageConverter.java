@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -12,7 +14,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -30,16 +31,19 @@ import io.micrometer.context.ContextRegistry;
 import io.micrometer.context.ThreadLocalAccessor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import reactor.core.publisher.Hooks;
 
 @Component
 public class StreamMessageConverter
-		implements HttpMessageConverter<ModelAndView>, WebMvcConfigurer, HandlerInterceptor {
-
+implements HttpMessageConverter<ModelAndView>, WebMvcConfigurer, HandlerInterceptor {
+	
 	private ViewResolver resolver;
-
+	
 	private final ApplicationContext context;
-
+	
 	public StreamMessageConverter(ApplicationContext context) {
+		Hooks.enableAutomaticContextPropagation();
+		ContextRegistry.getInstance().registerThreadLocalAccessor(new RequestContextHolderAccessor());
 		this.context = context;
 	}
 
@@ -57,11 +61,36 @@ public class StreamMessageConverter
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-		ContextRegistry.getInstance().registerThreadLocalAccessor("request",
-				() -> new ServletRequestAttributes(request, response),
-				attrs -> RequestContextHolder.setRequestAttributes(attrs),
-				() -> RequestContextHolder.resetRequestAttributes());
 		return true;
+	}
+
+	class RequestContextHolderAccessor implements ThreadLocalAccessor<RequestAttributes> {
+
+		private Log log  = LogFactory.getLog(getClass());
+
+		@Override
+		public Object key() {
+			return RequestAttributes.class.getName();
+		}
+
+		@Override
+		public RequestAttributes getValue() {
+			log.info("Getting value: " + RequestContextHolder.getRequestAttributes());
+			return RequestContextHolder.getRequestAttributes();
+		}
+
+		@Override
+		public void setValue(RequestAttributes value) {
+			log.info("Setting value: " + RequestContextHolder.getRequestAttributes() + ", " + value);
+			RequestContextHolder.setRequestAttributes(value);
+		}
+
+		@Override
+		public void setValue() {
+			log.info("Resetting value: " + RequestContextHolder.getRequestAttributes());
+			//RequestContextHolder.resetRequestAttributes();
+		}
+
 	}
 
 	@Override
@@ -112,12 +141,12 @@ public class StreamMessageConverter
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void extractThreadLocals() {
-		for (ThreadLocalAccessor accessor : ContextRegistry.getInstance().getThreadLocalAccessors()) {
-			Object value = accessor.getValue();
-			if (value != null) {
-				accessor.setValue(value);
-			}
-		}
+		// for (ThreadLocalAccessor accessor : ContextRegistry.getInstance().getThreadLocalAccessors()) {
+		// 	Object value = accessor.getValue();
+		// 	if (value != null) {
+		// 		accessor.setValue(value);
+		// 	}
+		// }
 	}
 
 }
